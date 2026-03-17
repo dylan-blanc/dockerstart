@@ -36,3 +36,18 @@
 ![img 1](Images/image-8.png)
 ![img 2](Images/image-9.png)
 ![img 3](Images/image-10.png)
+
+# retourner dans le terminal de docker desktop ET Arrêter votre container par son ID (2 manière de trouver l’ID)
+
+![via l'id present dans l'interface container](Images-11.png)
+![stop via l'id de la commande docker ps](Images-12.png)
+
+# Supprimer le container (2 manières)
+
+![via interface](Images-13.png)
+![via commande](Images-14.png)
+
+# supprimer l’image docker de super mario (2 manières)
+
+![via interface](Images-15.png)
+![via commande](Images-16.png)
