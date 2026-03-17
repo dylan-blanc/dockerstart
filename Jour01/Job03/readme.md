@@ -50,4 +50,4 @@
 # supprimer l’image docker de super mario (2 manières)
 
 ![via interface](Images/image-15.png)
-![via commande](Images-16/image.png)
+![via commande](Images-16/image-16.png)
