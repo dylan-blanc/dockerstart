@@ -1,0 +1,39 @@
+services:
+  php:
+    build: .
+    ports:
+      - "8080:80"
+    volumes: #local, hot reload
+      - ./src:/var/www/html
+
+  db:
+    image: mysql:8
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    environment:
+      MYSQL_ROOT_PASSWORD: motdepassetressecret
+      MYSQL_DATABASE: lamp_demo
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: etsonmotdepasse
+
+    volumes: #persistant dans le volume
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: dev
+      PMA_PASSWORD: etsonmotdepasse
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

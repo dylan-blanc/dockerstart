@@ -1,0 +1,69 @@
+services:
+  php:
+    build: .
+    ports:
+      - "8080:80"
+    volumes: #local, hot reload
+      - ./src:/var/www/html
+
+  db:
+    image: mysql:8
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    environment:
+      MYSQL_ROOT_PASSWORD: motdepassetressecret
+      MYSQL_DATABASE: demo
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: etsonmotdepasse
+
+    volumes: #persistant dans le volume
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./.env
+    volumes:
+      - ./backend/server.js:/app/server.js
+    command: ["node", "--watch", "server.js"]
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_BACKEND_URL=http://localhost:3000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: dev
+      PMA_PASSWORD: etsonmotdepasse
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

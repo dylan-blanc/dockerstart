@@ -1,0 +1,60 @@
+
+services:
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:             #local, hot reload
+     - ./src:/var/www/html
+     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  api:
+    image: node:18-alpine
+    restart: unless-stopped
+    # no => pas de redémarrage automatique
+    # always => redémarrage automatique même si le conteneur s'arrête normalement
+    # on-failure => redémarrage automatique uniquement si le conteneur s'arrête avec une erreur (code de sortie différent de 0)
+    # unless-stopped => redémarrage automatique sauf si le conteneur est arrêté manuellement
+    ports:
+      - "3000:3000"
+      - "8443:8443"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  backend:
+   build: ./backend
+
+  frontend:
+    build: 
+     context: ./frontend
+     dockerfile: Dockerfile.dev
+
+  redis:
+    image: redis:7-alpine
+
+  db:
+    image: mysql:8
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    environment:
+      MYSQL_ROOT_PASSWORD: motdepassetressecret
+      MYSQL_DATABASE: testdockercomposeyml
+      MYSQL_USER: dblc
+      MYSQL_PASSWORD: loutre
+      
+    volumes:       #permanent dans le volume
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
